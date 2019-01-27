@@ -28,9 +28,15 @@ class User
      */
     private $mail;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Success", mappedBy="users")
+     */
+    private $successes;
+
     public function __construct()
     {
         $this->games = new ArrayCollection();
+        $this->successes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -77,6 +83,34 @@ class User
     public function setMail(string $mail): self
     {
         $this->mail = $mail;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Success[]
+     */
+    public function getSuccesses(): Collection
+    {
+        return $this->successes;
+    }
+
+    public function addSuccess(Success $success): self
+    {
+        if (!$this->successes->contains($success)) {
+            $this->successes[] = $success;
+            $success->addUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSuccess(Success $success): self
+    {
+        if ($this->successes->contains($success)) {
+            $this->successes->removeElement($success);
+            $success->removeUser($this);
+        }
 
         return $this;
     }
