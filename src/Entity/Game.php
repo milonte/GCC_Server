@@ -27,6 +27,11 @@ class Game
      */
     private $user_id;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $possessed;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -52,6 +57,18 @@ class Game
     public function setUserId(?User $user_id): self
     {
         $this->user_id = $user_id;
+
+        return $this;
+    }
+
+    public function getPossessed(): ?bool
+    {
+        return $this->possessed;
+    }
+
+    public function setPossessed(bool $possessed): self
+    {
+        $this->possessed = $possessed;
 
         return $this;
     }
