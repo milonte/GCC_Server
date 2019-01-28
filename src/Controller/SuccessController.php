@@ -21,7 +21,13 @@ class SuccessController extends AbstractController
         $successes = $em->findAll();
         $result = [];
         foreach ($successes as $success) {
-            $result[] = ['id' => $success->getId(), 'name' => $success->getName()];
+            $result[] = [
+                'id' => $success->getId(),
+                'name' => $success->getName(),
+                'title' => $success->getTitle(),
+                'description' => $success->getDescription(),
+                'image_url' => $success->getImageUrl(),
+            ];
         }
         return new JsonResponse($result, Response::HTTP_CREATED);
         
@@ -51,32 +57,21 @@ class SuccessController extends AbstractController
      * @param Request $request
      * @Route("/success/add", name="success_add", methods={"POST"})
      */
-    public function createPossessed(Request $request)
+    public function addSuccess(Request $request)
     {
         $data = $request->getContent();
         $successData = json_decode($data);
 
-        $success = $this->getDoctrine()->getRepository(success::class)
-        ->findOneBy(['success' => $successData->success, 'user_id' => $successData->userId, 'possessed' => false]);
-        if($success) {
-            $this->getDoctrine()->getManager()->remove($success);
-            $this->getDoctrine()->getManager()->flush();
-        }
-            
-        $em = $this->getDoctrine()->getmanager()->getRepository(success::class);
-        if (!($em->findBy(['user_id' => $successData->userId, 'success' => $successData->success]))) {
-            $success = new success();
-            $user = $this->getDoctrine()->getRepository(User::class)
-                ->findOneBy(['id' => $successData->userId]);
-            $success->setsuccess($successData->success);
-            $success->setUserId($user);
-            $success->setPossessed(true);
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($success);
-            $em->flush();
-            return new JsonResponse('Add Complete !', Response::HTTP_CREATED);
-        }
-        return new JsonResponse('Can t add !', Response::HTTP_CREATED);
+        $em = $this->getDoctrine()->getManager();
+        $user = $em->getRepository(User::class)
+        ->findOneBy(['id' => $successData->userId]);
+        $success = $em->getRepository(Success::class)
+        ->findOneBy(['id' => $successData->successId]);
+
+        $user->addSuccess($success);
+        $em->persist($user);
+        $em->flush();
+        return new JsonResponse('Add Complete !', Response::HTTP_CREATED);
     }
 
      /**
